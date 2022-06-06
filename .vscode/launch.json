@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Launch RetinalMatch",
+            "request": "launch",
+            "mainClass": "RetinalMatch",
+            "projectName": "BiometricRecognition_76931dc5",
+            "vmArgs": "-Djava.library.path=C:/Users/490/Desktop/Workspace/Projects/Algorithms/ComputerVision/BiometricRecognition/lib/opencv/java/x64",
+            "args": [
+                "../RIDB/IM000001_2.JPG",
+                "../RIDB/IM000001_3.JPG",
+            ]
+        }
+    ]
+}
