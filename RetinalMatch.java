@@ -19,21 +19,40 @@ import org.opencv.imgproc.Imgproc;
 public class RetinalMatch {
 
     /**
-     * Represents the retinal image of a person taken using
-     * a retinal fundus camera that scans the eye.
+     * Main entry point to the program.
+     * 
+     * @param args Array of image filenames
      */
-
-    private static Mat src;
-    private static Mat dst;
-
     public static void main(String[] args) {
+
+        // load the OpenCV core library
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-        String filename1 = args[1];
-        String filename2 = args[2];
+        if (args.length < 2) { // basic cli arg checking
+            System.out.println("Error: Not enough arguments");
+            System.out.println("Usage java RetinalMatch <path to image 1>.jpg <path to image 2>.jpg");
+            System.exit(-1);
+        }
 
-        RetinalImage ri1 = new RetinalImage(filename1);
-        RetinalImage ri2 = new RetinalImage(filename2);
+        // retrieve images from cli
+        String filename1 = args[0];
+        String filename2 = args[1];
+
+        RetinalImage image1 = new RetinalImage(filename1);
+        RetinalImage image2 = new RetinalImage(filename2);
+
+        RetinalMatch.pipeline(image1);
     }
 
+    /**
+     * Computer vision pipline made up of CV operations
+     * 
+     * @param image The RetinalImage being processed.
+     */
+    private static void pipeline(RetinalImage image) {
+        // image.convertToHSV();
+        // image.medianFilter();
+        // image.adaptiveThreshold();
+        image.imageDilatation();
+    }
 }
