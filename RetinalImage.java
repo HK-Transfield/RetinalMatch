@@ -44,7 +44,7 @@ public class RetinalImage {
      * Writes the image in its current form to a new file
      */
     public void writeSrc() {
-        Imgcodecs.imwrite("img_final", src);
+        Imgcodecs.imwrite("RIDB_out/img_final", src);
     }
 
     /**
@@ -60,7 +60,7 @@ public class RetinalImage {
             Imgproc.medianBlur(src, dst, i);
         }
 
-        Imgcodecs.imwrite("img_median.jpg", dst);
+        Imgcodecs.imwrite("RIDB_out/img_median.jpg", dst);
     }
 
     /**
@@ -81,7 +81,7 @@ public class RetinalImage {
                 Imgproc.ADAPTIVE_THRESH_MEAN_C,
                 Imgproc.THRESH_BINARY, 11, 12);
 
-        Imgcodecs.imwrite("img_threshold.jpg", dst);
+        Imgcodecs.imwrite("RIDB_out/img_threshold.jpg", dst);
     }
 
     /**
@@ -91,7 +91,7 @@ public class RetinalImage {
         dst = new Mat();
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
         Imgproc.equalizeHist(src, dst);
-        Imgcodecs.imwrite("img_contrast.jpg", dst);
+        Imgcodecs.imwrite("RIDB_out/img_contrast.jpg", dst);
     }
 
     /**
@@ -116,7 +116,7 @@ public class RetinalImage {
         src.copyTo(dst, detectedEdges);
 
         Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2GRAY);
-        Imgcodecs.imwrite("img_dilatation.jpg", dst);
+        Imgcodecs.imwrite("RIDB_out/img_dilatation.jpg", dst);
     }
 
     /**
@@ -126,6 +126,6 @@ public class RetinalImage {
         dst = new Mat();
 
         Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
-        Imgcodecs.imwrite("img_hsv.jpg", dst);
+        Imgcodecs.imwrite("RIDB_out/img_hsv.jpg", dst);
     }
 }
