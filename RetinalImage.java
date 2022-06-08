@@ -1,11 +1,17 @@
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
+import org.opencv.core.DMatch;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.features2d.*;;
 
 /**
  * Represents the retinal image of a person taken using
@@ -32,9 +38,9 @@ public class RetinalImage {
 
         // check that the image does exist
         if (src.empty()) {
-            System.out.println("Error: Cannot open image");
+            System.out.println("Error: Cannot read image");
             System.out.println("Usage java RetinalMatch <path to image 1>.jpg <path to image 2>.jpg");
-            System.exit(-1);
+            System.exit(0);
         }
     }
 
@@ -48,6 +54,15 @@ public class RetinalImage {
     }
 
     /**
+     * Provides access to the src class property.
+     * 
+     * @return The Mat source image of the RetinalImage of the class.
+     */
+    public Mat getSrc() {
+        return src;
+    }
+
+    /**
      * Applies a non-linear filter to the image, which will remove noise from an
      * image or signal
      * 
@@ -57,10 +72,10 @@ public class RetinalImage {
     public void medianFilter() {
         dst = new Mat();
         for (int i = 1; i < MAX_KERNEL_LENGTH; i += 2) {
-            Imgproc.medianBlur(src, dst, i);
+            Imgproc.medianBlur(src, src, i);
         }
 
-        Imgcodecs.imwrite("RIDB_out/img_median.jpg", dst);
+        Imgcodecs.imwrite("RIDB_out/img_median.jpg", src);
     }
 
     /**
@@ -77,11 +92,11 @@ public class RetinalImage {
         dst = new Mat(src.rows(), src.cols(), src.type());
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
 
-        Imgproc.adaptiveThreshold(src, dst, 125,
+        Imgproc.adaptiveThreshold(src, src, 125,
                 Imgproc.ADAPTIVE_THRESH_MEAN_C,
                 Imgproc.THRESH_BINARY, 11, 12);
 
-        Imgcodecs.imwrite("RIDB_out/img_threshold.jpg", dst);
+        Imgcodecs.imwrite("RIDB_out/img_threshold.jpg", src);
     }
 
     /**
@@ -90,8 +105,8 @@ public class RetinalImage {
     public void enhanceContrast() {
         dst = new Mat();
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.equalizeHist(src, dst);
-        Imgcodecs.imwrite("RIDB_out/img_contrast.jpg", dst);
+        Imgproc.equalizeHist(src, src);
+        Imgcodecs.imwrite("RIDB_out/img_contrast.jpg", src);
     }
 
     /**
@@ -125,7 +140,53 @@ public class RetinalImage {
     public void convertToHSV() {
         dst = new Mat();
 
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
-        Imgcodecs.imwrite("RIDB_out/img_hsv.jpg", dst);
+        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
+        Imgcodecs.imwrite("RIDB_out/img_hsv.jpg", src);
+    }
+
+    /**
+     * Compares two images to determine how similar they are
+     * 
+     * https://www.programcreek.com/java-api-examples/?api=org.opencv.features2d.DescriptorExtractor
+     * 
+     * @param ri The image being compared and matched.
+     */
+    public void compareImage(RetinalImage ri) {
+        Mat other = ri.getSrc();
+        SIFT detector = SIFT.create();
+        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
+
+        // identify keypoint detections
+        MatOfKeyPoint mkp1 = new MatOfKeyPoint();
+        Mat desc = new Mat();
+        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
+        detector.detect(src, mkp1);
+        detector.compute(src, mkp1, desc);
+
+        MatOfKeyPoint mkp2 = new MatOfKeyPoint();
+        Mat desc2 = new Mat();
+        Imgproc.cvtColor(other, other, Imgproc.COLOR_BGR2GRAY);
+        detector.detect(other, mkp2);
+        detector.compute(other, mkp2, desc2);
+
+        // match features
+        MatOfDMatch matches = new MatOfDMatch();
+        matcher.match(desc, desc2, matches);
+
+        List<DMatch> l = matches.toList();
+        List<DMatch> ldm = new ArrayList<DMatch>();
+
+        for (int i = 0; i < l.size(); i++) {
+            DMatch dmatch = l.get(i);
+
+            if (Math.abs(dmatch.queryIdx - dmatch.trainIdx) < 10f) {
+                ldm.add(dmatch);
+            }
+        }
+
+        matches.fromList(ldm);
+        Mat outImg = new Mat();
+        Features2d.drawMatches(src, mkp1, other, mkp2, matches, outImg);
+        Imgcodecs.imwrite("img_compare.jpg", outImg);
     }
 }

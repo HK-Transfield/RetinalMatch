@@ -41,11 +41,15 @@ public class RetinalMatch {
         RetinalImage image1 = new RetinalImage(filename1);
         RetinalImage image2 = new RetinalImage(filename2);
 
-        RetinalMatch.pipeline(image1);
+        image1.compareImage(image2);
+
+        // RetinalMatch.pipeline(image1);
     }
 
     /**
-     * Computer vision pipline made up of CV operations
+     * Computer vision pipline made up of CV operations.
+     * * The order which the methods are called can be *
+     * * rearranged *
      * 
      * @param image The RetinalImage being processed.
      */
@@ -53,6 +57,6 @@ public class RetinalMatch {
         // image.convertToHSV();
         // image.medianFilter();
         // image.adaptiveThreshold();
-        image.imageDilatation();
+        // image.imageDilatation();
     }
 }
