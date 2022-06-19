@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.opencv.core.Core;
@@ -9,9 +10,16 @@ import org.opencv.core.MatOfDMatch;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.features2d.*;;
+import org.opencv.features2d.*;
+import org.opencv.core.Rect;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.Point;
+import org.opencv.core.Range;
+import org.opencv.core.Scalar;
 
 /**
  * Represents the retinal image of a person taken using
@@ -20,11 +28,11 @@ import org.opencv.features2d.*;;
  * @author Harmon Transfield and Edward Wang
  */
 public class RetinalImage {
-    private Mat src, dst, original;
+    private Mat _src;
 
-    private final int DELAY_CAPTION = 1500;
-    private final int DELAY_BLUR = 100;
-    private final int MAX_KERNEL_LENGTH = 31;
+    private static final int DELAY_CAPTION = 1500;
+    private static final int DELAY_BLUR = 100;
+    private static final int MAX_KERNEL_LENGTH = 31;
 
     /**
      * Constructor.
@@ -34,10 +42,10 @@ public class RetinalImage {
      */
     public RetinalImage(String filename) {
 
-        src = original = Imgcodecs.imread(filename);
+        _src = Imgcodecs.imread(filename);
 
         // check that the image does exist
-        if (src.empty()) {
+        if (_src.empty()) {
             System.out.println("Error: Cannot read image");
             System.out.println("Usage java RetinalMatch <path to image 1>.jpg <path to image 2>.jpg");
             System.exit(0);
@@ -50,7 +58,7 @@ public class RetinalImage {
      * Writes the image in its current form to a new file
      */
     public void writeSrc() {
-        Imgcodecs.imwrite("RIDB_out/img_final", src);
+        Imgcodecs.imwrite("RIDB_out/img_final", _src);
     }
 
     /**
@@ -59,7 +67,7 @@ public class RetinalImage {
      * @return The Mat source image of the RetinalImage of the class.
      */
     public Mat getSrc() {
-        return src;
+        return _src;
     }
 
     /**
@@ -69,13 +77,14 @@ public class RetinalImage {
      * https://docs.opencv.org/3.4/dc/dd3/tutorial_gausian_median_blur_bilateral_filter.html
      * https://en.wikipedia.org/wiki/Median_filter
      */
-    public void medianFilter() {
-        dst = new Mat();
-        for (int i = 1; i < MAX_KERNEL_LENGTH; i += 2) {
+    public static Mat medianFilter(Mat src) {
+
+        for (int i = 1; i < 4; i += 2) {
             Imgproc.medianBlur(src, src, i);
         }
 
         Imgcodecs.imwrite("RIDB_out/img_median.jpg", src);
+        return src.clone();
     }
 
     /**
@@ -88,60 +97,65 @@ public class RetinalImage {
      * 
      * https://www.tutorialspoint.com/explain-opencv-adaptive-threshold-using-java-example
      */
-    public void adaptiveThreshold() {
-        dst = new Mat(src.rows(), src.cols(), src.type());
-        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
+    public static Mat adaptiveThreshold(Mat src) {
+        // Imgproc.cvtColor(ri, ri, Imgproc.COLOR_BGR2GRAY);
 
         Imgproc.adaptiveThreshold(src, src, 125,
                 Imgproc.ADAPTIVE_THRESH_MEAN_C,
                 Imgproc.THRESH_BINARY, 11, 12);
 
         Imgcodecs.imwrite("RIDB_out/img_threshold.jpg", src);
+        return src.clone();
     }
 
     /**
      * Increase the contrast of the image
      */
-    public void enhanceContrast() {
-        dst = new Mat();
+    public static Mat enhanceContrast(Mat src) {
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.equalizeHist(src, src);
-        Imgcodecs.imwrite("RIDB_out/img_contrast.jpg", src);
+        src.convertTo(src, -1, 2, 0);
+        return src.clone();
     }
 
     /**
-     * Dilitation adds pixels to the boundaries of the image
+     * Dilation adds pixels to the boundaries of the image
      * 
      * https://opencv-java-tutorials.readthedocs.io/en/latest/07-image-segmentation.html
      */
-    public void imageDilatation() {
+    public static Mat edgeDetection(Mat src) {
 
-        Mat grayImage = new Mat();
         Mat detectedEdges = new Mat();
-        dst = new Mat();
-        double threshold = 20;
-
-        Imgproc.cvtColor(src, grayImage, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.blur(grayImage, detectedEdges, new Size(3, 3));
-        Imgproc.Canny(detectedEdges, detectedEdges, threshold, threshold * 3, 3,
-                false);
+        Mat dst = new Mat();
 
         // fill dst image with 0s (meaning the image is completely black)
         Core.add(dst, Scalar.all(0), dst);
         src.copyTo(dst, detectedEdges);
 
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2GRAY);
-        Imgcodecs.imwrite("RIDB_out/img_dilatation.jpg", dst);
+        return dst;
+    }
+
+    /**
+     * 
+     * @param src
+     * @return
+     */
+    public static Mat erosionAndDilation(Mat src) {
+        Mat kernel1 = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(1, 1));
+        Mat kernel2 = Mat.ones(5, 5, CvType.CV_8U);
+
+        Imgproc.erode(src, new Mat(), kernel2);
+        Imgproc.dilate(src, src, kernel1);
+        Imgcodecs.imwrite("RIDB_out/img_errosion.jpg", src);
+        return src.clone();
     }
 
     /**
      * Changes the image to a HSV format
      */
-    public void convertToHSV() {
-        dst = new Mat();
+    public static Mat convertToHSV(Mat src) {
 
         Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
-        Imgcodecs.imwrite("RIDB_out/img_hsv.jpg", src);
+        return src.clone();
     }
 
     /**
@@ -152,22 +166,23 @@ public class RetinalImage {
      * @param ri The image being compared and matched.
      */
     public void compareImage(RetinalImage ri) {
-        Mat other = ri.getSrc();
+        Mat src2 = ri.getSrc();
         SIFT detector = SIFT.create();
         DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
 
         // identify keypoint detections
         MatOfKeyPoint mkp1 = new MatOfKeyPoint();
         Mat desc = new Mat();
-        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
-        detector.detect(src, mkp1);
-        detector.compute(src, mkp1, desc);
+        _src = pipeline(_src);
+        src2 = pipeline(src2);
+
+        detector.detect(_src, mkp1);
+        detector.compute(_src, mkp1, desc);
 
         MatOfKeyPoint mkp2 = new MatOfKeyPoint();
         Mat desc2 = new Mat();
-        Imgproc.cvtColor(other, other, Imgproc.COLOR_BGR2GRAY);
-        detector.detect(other, mkp2);
-        detector.compute(other, mkp2, desc2);
+        detector.detect(src2, mkp2);
+        detector.compute(src2, mkp2, desc2);
 
         // match features
         MatOfDMatch matches = new MatOfDMatch();
@@ -186,7 +201,32 @@ public class RetinalImage {
 
         matches.fromList(ldm);
         Mat outImg = new Mat();
-        Features2d.drawMatches(src, mkp1, other, mkp2, matches, outImg);
+        Features2d.drawMatches(_src, mkp1, src2, mkp2, matches, outImg);
         Imgcodecs.imwrite("img_compare.jpg", outImg);
+
+        Mat matching = new Mat();
+        Imgproc.matchTemplate(_src, src2, matching, Imgproc.TM_SQDIFF);
+
+        MinMaxLocResult mmr = Core.minMaxLoc(matching);
+        System.out.println("Max: " + mmr.maxVal);
+        System.out.println("Min: " + mmr.minVal);
+    }
+
+    /**
+     * Computer vision pipline made up of CV operations.
+     * 
+     * @param image The RetinalImage being processed.
+     */
+    private static Mat pipeline(Mat src) {
+
+        // convertToHSV(src);
+        medianFilter(src);
+        enhanceContrast(src);
+        adaptiveThreshold(src);
+        erosionAndDilation(src);
+        // edgeDetection(ri);
+
+        return src;
+
     }
 }

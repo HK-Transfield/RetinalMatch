@@ -31,7 +31,7 @@ public class RetinalMatch {
         if (args.length < 2) { // basic cli arg checking
             System.out.println("Error: Not enough arguments");
             System.out.println("Usage java RetinalMatch <path to image 1>.jpg <path to image 2>.jpg");
-            System.exit(-1);
+            System.exit(0);
         }
 
         // retrieve images from cli
@@ -42,21 +42,5 @@ public class RetinalMatch {
         RetinalImage image2 = new RetinalImage(filename2);
 
         image1.compareImage(image2);
-
-        // RetinalMatch.pipeline(image1);
-    }
-
-    /**
-     * Computer vision pipline made up of CV operations.
-     * * The order which the methods are called can be *
-     * * rearranged *
-     * 
-     * @param image The RetinalImage being processed.
-     */
-    private static void pipeline(RetinalImage image) {
-        // image.convertToHSV();
-        // image.medianFilter();
-        // image.adaptiveThreshold();
-        // image.imageDilatation();
     }
 }
