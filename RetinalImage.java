@@ -167,45 +167,46 @@ public class RetinalImage {
      */
     public void compareImage(RetinalImage ri) {
         Mat src2 = ri.getSrc();
-        SIFT detector = SIFT.create();
-        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
+        // SIFT detector = SIFT.create();
+        // DescriptorMatcher matcher =
+        // DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
 
         // identify keypoint detections
-        MatOfKeyPoint mkp1 = new MatOfKeyPoint();
-        Mat desc = new Mat();
+        // MatOfKeyPoint mkp1 = new MatOfKeyPoint();
+        // Mat desc = new Mat();
         _src = pipeline(_src);
         src2 = pipeline(src2);
 
-        detector.detect(_src, mkp1);
-        detector.compute(_src, mkp1, desc);
+        // detector.detect(_src, mkp1);
+        // detector.compute(_src, mkp1, desc);
 
-        MatOfKeyPoint mkp2 = new MatOfKeyPoint();
-        Mat desc2 = new Mat();
-        detector.detect(src2, mkp2);
-        detector.compute(src2, mkp2, desc2);
+        // MatOfKeyPoint mkp2 = new MatOfKeyPoint();
+        // Mat desc2 = new Mat();
+        // detector.detect(src2, mkp2);
+        // detector.compute(src2, mkp2, desc2);
 
-        // match features
-        MatOfDMatch matches = new MatOfDMatch();
-        matcher.match(desc, desc2, matches);
+        // // match features
+        // MatOfDMatch matches = new MatOfDMatch();
+        // matcher.match(desc, desc2, matches);
 
-        List<DMatch> l = matches.toList();
-        List<DMatch> ldm = new ArrayList<DMatch>();
+        // List<DMatch> l = matches.toList();
+        // List<DMatch> ldm = new ArrayList<DMatch>();
 
-        for (int i = 0; i < l.size(); i++) {
-            DMatch dmatch = l.get(i);
+        // for (int i = 0; i < l.size(); i++) {
+        // DMatch dmatch = l.get(i);
 
-            if (Math.abs(dmatch.queryIdx - dmatch.trainIdx) < 10f) {
-                ldm.add(dmatch);
-            }
-        }
+        // if (Math.abs(dmatch.queryIdx - dmatch.trainIdx) < 10f) {
+        // ldm.add(dmatch);
+        // }
+        // }
 
-        matches.fromList(ldm);
-        Mat outImg = new Mat();
-        Features2d.drawMatches(_src, mkp1, src2, mkp2, matches, outImg);
-        Imgcodecs.imwrite("img_compare.jpg", outImg);
+        // matches.fromList(ldm);
+        // Mat outImg = new Mat();
+        // Features2d.drawMatches(_src, mkp1, src2, mkp2, matches, outImg);
+        // Imgcodecs.imwrite("img_compare.jpg", outImg);
 
         Mat matching = new Mat();
-        Imgproc.matchTemplate(_src, src2, matching, Imgproc.TM_SQDIFF);
+        Imgproc.matchTemplate(_src, src2, matching, Imgproc.TM_SQDIFF_NORMED);
 
         MinMaxLocResult mmr = Core.minMaxLoc(matching);
         System.out.println("Max: " + mmr.maxVal);
