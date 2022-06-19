@@ -206,7 +206,7 @@ public class RetinalImage {
         // Imgcodecs.imwrite("img_compare.jpg", outImg);
 
         Mat matching = new Mat();
-        Imgproc.matchTemplate(_src, src2, matching, Imgproc.TM_SQDIFF_NORMED);
+        Imgproc.matchTemplate(_src, src2, matching, Imgproc.TM_SQDIFF);
 
         MinMaxLocResult mmr = Core.minMaxLoc(matching);
         System.out.println("Max: " + mmr.maxVal);
