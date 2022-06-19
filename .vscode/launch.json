@@ -17,7 +17,7 @@
             "mainClass": "RetinalMatch",
             "projectName": "BiometricRecognition_76931dc5",
             "vmArgs": "-Djava.library.path=C:/Users/490/Desktop/Workspace/Projects/Algorithms/ComputerVision/BiometricRecognition/lib/opencv/java/x64",
-            "args": "RIDB_in/IM000002_2.JPG RIDB_in/IM000005_20.JPG",
+            "args": "RIDB_in/IM000002_1.JPG RIDB_in/IM000005_20.JPG",
         }
     ]
 }
