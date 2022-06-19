@@ -9,8 +9,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.Point;
 
-/* These imports only work in later versions (i.e 4.6.0) */
-/* Uncomment these to run feature detection */
+// /* These imports only work in later versions (i.e 4.6.0) */
+// /* Uncomment these to run feature detection */
 // import org.opencv.core.MatOfDMatch;
 // import org.opencv.core.DMatch;
 // import org.opencv.core.MatOfKeyPoint;
@@ -35,7 +35,8 @@ public class RetinalMatch {
      */
     class RetinalImage {
         private Mat _src;
-        private final Double SIMILARITY_THRESHOLD = 0.5d; // values closer to 0 are better matches
+        private final Double SIMILARITY_THRESHOLD = 0.425d; // values closer to 0 are better matches
+        private final float MATCHING_THRESHOLD = 130f;
 
         /**
          * Constructor.
@@ -137,6 +138,8 @@ public class RetinalMatch {
          * Performs edge detection
          * 
          * https://opencv-java-tutorials.readthedocs.io/en/latest/07-image-segmentation.html
+         * 
+         * @param src The rouce image
          */
         public Mat edgeDetection(Mat src) {
 
@@ -191,6 +194,7 @@ public class RetinalMatch {
          * Useful links:
          * https://www.programcreek.com/java-api-examples/?api=org.opencv.features2d.DescriptorExtractor
          * https://docs.opencv.org/2.4/modules/imgproc/doc/object_detection.html?highlight=matchtemplate#matchtemplate
+         * https://linuxtut.com/en/c9497ffb5240622ede01/
          * 
          * @param src The image being compared and matched.
          */
@@ -202,11 +206,10 @@ public class RetinalMatch {
             Imgproc.matchTemplate(_src, src2, matching, Imgproc.TM_CCOEFF_NORMED);
 
             MinMaxLocResult mmr = Core.minMaxLoc(matching);
-            Double maxVal = new Double(mmr.maxVal);
-            System.out.println(maxVal);
-            System.out.print(mmr.maxVal < 0.5 ? 0 : 1);
+            System.out.println(mmr.maxVal);
+            System.out.println(mmr.maxVal < SIMILARITY_THRESHOLD ? 0 : 1);
 
-            /* !!!: Not available in 4.2.0 */
+            // /* !!!: Does not work in 4.2.0 */
             // SIFT detector = SIFT.create();
             // DescriptorMatcher matcher =
             // DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
@@ -239,6 +242,38 @@ public class RetinalMatch {
             // }
 
             // matches.fromList(ldm);
+
+            // List<MatOfDMatch> knnMatches = new ArrayList<>();
+            // matcher.knnMatch(desc, desc2, knnMatches, 2);
+
+            // // Filter matches using the Lowe's ratio test
+            // float ratioThresh = 0.8f;
+            // List<DMatch> listOfGoodMatches = new ArrayList<>();
+
+            // for (int i = 0; i < knnMatches.size(); i++) {
+            // if (knnMatches.get(i).rows() > 1) {
+            // DMatch[] matchesKNN = knnMatches.get(i).toArray();
+            // if (matchesKNN[0].distance < ratioThresh * matchesKNN[1].distance) {
+            // listOfGoodMatches.add(matchesKNN[0]);
+            // }
+            // }
+            // }
+
+            // // values for the same iamge is 0, therefore
+            // // the smaller the image, the higher the
+            // // similarity
+            // float sumDistance = 0;
+            // float distance = 0;
+
+            // for (DMatch m : listOfGoodMatches) {
+            // sumDistance += m.distance;
+            // }
+
+            // System.out.println(mmr.maxVal < MATCHING_THRESHOLD ? 1 : 0);
+
+            // // the smaller the value, the higher similarity
+            // distance = sumDistance / listOfGoodMatches.size();
+            // System.out.println(distance);
             // Mat outImg = new Mat();
             // Features2d.drawMatches(_src, mkp1, src2, mkp2, matches, outImg);
             // Imgcodecs.imwrite("img_compare.jpg", outImg);
