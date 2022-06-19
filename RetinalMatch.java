@@ -12,7 +12,7 @@ import org.opencv.core.Size;
 import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.features2d.*; // not available in 4.2.0
+//import org.opencv.features2d.*; // not available in 4.2.0
 
 /**
  * A program using computer vision techniques to see if a person
@@ -178,40 +178,41 @@ public class RetinalMatch {
             System.out.println(mmr.maxVal <= SIMILARITY_THRESHOLD ? 1 : 0);
 
             /* !!!: Not available in 4.2.0 */
-            SIFT detector = SIFT.create();
-            DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
+            // SIFT detector = SIFT.create();
+            // DescriptorMatcher matcher =
+            // DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
 
-            // identify keypoint detections
-            MatOfKeyPoint mkp1 = new MatOfKeyPoint();
-            Mat desc = new Mat();
+            // // identify keypoint detections
+            // MatOfKeyPoint mkp1 = new MatOfKeyPoint();
+            // Mat desc = new Mat();
 
-            detector.detect(_src, mkp1);
-            detector.compute(_src, mkp1, desc);
+            // detector.detect(_src, mkp1);
+            // detector.compute(_src, mkp1, desc);
 
-            MatOfKeyPoint mkp2 = new MatOfKeyPoint();
-            Mat desc2 = new Mat();
-            detector.detect(src2, mkp2);
-            detector.compute(src2, mkp2, desc2);
+            // MatOfKeyPoint mkp2 = new MatOfKeyPoint();
+            // Mat desc2 = new Mat();
+            // detector.detect(src2, mkp2);
+            // detector.compute(src2, mkp2, desc2);
 
-            // match features
-            MatOfDMatch matches = new MatOfDMatch();
-            matcher.match(desc, desc2, matches);
+            // // match features
+            // MatOfDMatch matches = new MatOfDMatch();
+            // matcher.match(desc, desc2, matches);
 
-            List<DMatch> l = matches.toList();
-            List<DMatch> ldm = new ArrayList<DMatch>();
+            // List<DMatch> l = matches.toList();
+            // List<DMatch> ldm = new ArrayList<DMatch>();
 
-            for (int i = 0; i < l.size(); i++) {
-                DMatch dmatch = l.get(i);
+            // for (int i = 0; i < l.size(); i++) {
+            // DMatch dmatch = l.get(i);
 
-                if (Math.abs(dmatch.queryIdx - dmatch.trainIdx) < 10f) {
-                    ldm.add(dmatch);
-                }
-            }
+            // if (Math.abs(dmatch.queryIdx - dmatch.trainIdx) < 10f) {
+            // ldm.add(dmatch);
+            // }
+            // }
 
-            matches.fromList(ldm);
-            Mat outImg = new Mat();
-            Features2d.drawMatches(_src, mkp1, src2, mkp2, matches, outImg);
-            Imgcodecs.imwrite("img_compare.jpg", outImg);
+            // matches.fromList(ldm);
+            // Mat outImg = new Mat();
+            // Features2d.drawMatches(_src, mkp1, src2, mkp2, matches, outImg);
+            // Imgcodecs.imwrite("img_compare.jpg", outImg);
         }
 
         /**
